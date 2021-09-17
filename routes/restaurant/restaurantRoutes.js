@@ -3,8 +3,7 @@ import asyncHandler from 'express-async-handler';
 import { body, query, param } from 'express-validator';
 import { FormValidation, Auth, Database } from 'qurba-node-common';
 
-// Grab the user schema
-const Item = Database.Schemas.Item;
+// Grab the necessary schemas
 const Restaurant = Database.Schemas.Restaurant;
 
 // Assign a reference to avoid using the long name every time
