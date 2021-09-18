@@ -133,7 +133,7 @@ const deleteRestaurant = asyncHandler(async (req, res) => {
 router
 	.route('/')
 	.get(
-		validate([query('pageNo').optional().isNumeric(), query('keyword').isString().optional()]),
+		validate([query('pageNo').optional().isNumeric(), query('keyword').isString().isAlpha().optional()]),
 		getRestaurants
 	)
 	.post(
