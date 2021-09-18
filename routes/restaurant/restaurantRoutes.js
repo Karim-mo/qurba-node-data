@@ -13,26 +13,26 @@ const auth = Auth.UserAuth_JWT;
 const router = express.Router();
 
 const getRestaurants = asyncHandler(async (req, res) => {
-	const restuarantsPerPage = 10;
+	const restaurantsPerPage = 6;
 	const pageNo = Number(req.query.pageNo) || 1;
 	const restaurantCount = await Restaurant.countDocuments({});
 
 	if (restaurantCount) {
-		const pages = Math.ceil(restaurantCount / restuarantsPerPage);
+		const pages = Math.ceil(restaurantCount / restaurantsPerPage);
 
 		if (pages < pageNo) {
 			res.status(404);
-			throw new Error('No restuarants to show');
+			throw new Error('No restaurants to show');
 		}
 
-		const restuarants = await Restaurant.find({})
-			.limit(restuarantsPerPage)
-			.skip(restuarantsPerPage * (pageNo - 1));
+		const restaurants = await Restaurant.find({})
+			.limit(restaurantsPerPage)
+			.skip(restaurantsPerPage * (pageNo - 1));
 
-		res.json({ restuarants, pages });
+		res.json({ restaurants, pages });
 	} else {
 		res.status(404);
-		throw new Error('No restuarants to show');
+		throw new Error('No restaurants to show');
 	}
 });
 
@@ -103,7 +103,7 @@ const deleteRestaurant = asyncHandler(async (req, res) => {
 
 router
 	.route('/')
-	.get(validate([query('pageNo').isNumeric()]), getRestaurants)
+	.get(validate([query('pageNo').optional().isNumeric()]), getRestaurants)
 	.post(
 		auth.protectedRoute,
 		validate([
