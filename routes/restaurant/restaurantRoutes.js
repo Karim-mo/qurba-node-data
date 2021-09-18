@@ -15,7 +15,34 @@ const router = express.Router();
 const getRestaurants = asyncHandler(async (req, res) => {
 	const restaurantsPerPage = 6;
 	const pageNo = Number(req.query.pageNo) || 1;
-	const restaurantCount = await Restaurant.countDocuments({});
+	console.log(req.query.keyword);
+	const nameKeyword = req.query.keyword
+		? {
+				name: {
+					$regex: req.query.keyword,
+					$options: 'i',
+				},
+		  }
+		: {};
+	const descriptionKeyword = req.query.keyword
+		? {
+				description: {
+					$regex: req.query.keyword,
+					$options: 'i',
+				},
+		  }
+		: {};
+	const categoryKeyword = req.query.keyword
+		? {
+				category: {
+					$regex: req.query.keyword,
+					$options: 'i',
+				},
+		  }
+		: {};
+	const restaurantCount = await Restaurant.countDocuments({
+		$or: [{ ...nameKeyword }, { ...categoryKeyword }, { ...descriptionKeyword }],
+	});
 
 	if (restaurantCount) {
 		const pages = Math.ceil(restaurantCount / restaurantsPerPage);
@@ -25,7 +52,9 @@ const getRestaurants = asyncHandler(async (req, res) => {
 			throw new Error('No restaurants to show');
 		}
 
-		const restaurants = await Restaurant.find({})
+		const restaurants = await Restaurant.find({
+			$or: [{ ...nameKeyword }, { ...categoryKeyword }, { ...descriptionKeyword }],
+		})
 			.limit(restaurantsPerPage)
 			.skip(restaurantsPerPage * (pageNo - 1));
 
@@ -103,7 +132,10 @@ const deleteRestaurant = asyncHandler(async (req, res) => {
 
 router
 	.route('/')
-	.get(validate([query('pageNo').optional().isNumeric()]), getRestaurants)
+	.get(
+		validate([query('pageNo').optional().isNumeric(), query('keyword').isString().optional()]),
+		getRestaurants
+	)
 	.post(
 		auth.protectedRoute,
 		validate([
